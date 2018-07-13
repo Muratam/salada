@@ -17,4 +17,4 @@ export const vegetables = [
   ['玉ねぎ', 'tamanegi.png'],
   ['てんさい', 'tensai.png'],
   ['トマト', 'tomato.png'],
-].map(x => [x[0], '/static/images/' + x[1]]);
+].map(x => [x[0], x[1]]);
