@@ -1,22 +1,16 @@
-import {
-  autoDetectRenderer,
-  Container,
-  loader,
-  Sprite,
-  // Application
-} from 'pixi.js';
-let renderer = autoDetectRenderer(256, 256, {
-  antialias: true,
+import * as PIXI from 'pixi.js';
+const app = new PIXI.Application({
+  // width:window.innderWidth
   transparent: true,
-  resolution: 1,
-  autoResize: true
+  antialias: true,
+  // resolution: 0.5,
+  autoResize: true,
 });
-document.body.appendChild(renderer.view);
 // renderer.view.style.position = 'absolute';
 // renderer.view.style.display = 'block';
 // renderer.resize(window.innderWidth, window.innerHeight);
-let scene = new Container();
-let vegetables = [
+document.body.appendChild(app.view);
+const vegetables = [
   ['白菜', 'hakusai.png'],
   ['ほうれん草', 'hourensou.png'],
   ['じゃがいも', 'jagaimo.png'],
@@ -36,14 +30,15 @@ let vegetables = [
   ['てんさい', 'tensai.png'],
   ['トマト', 'tomato.png'],
 ].map((x) => [x[0], '/static/images/' + x[1]]);
-let getTexture = (key) => loader.resources[key].texture;
-let getSprite = (key) => new Sprite(getTexture(key))
 
-function setup() {
+function launch(loader, resources) {
+  let getSprite = (key) => new PIXI.Sprite(resources[key].texture);
   let cat = getSprite(vegetables[0][1]);
-  scene.addChild(cat);
-  renderer.render(scene);
+  app.stage.addChild(cat);
+  app.ticker.add(() => {
+    cat.rotation += 0.01;
+  });
 }
-loader
+PIXI.loader
   .add(vegetables.map((x) => x[1]))
-  .load(setup);
+  .load(launch);
