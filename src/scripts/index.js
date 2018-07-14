@@ -18,6 +18,10 @@ let dishImage = "osara.png";
 let resourceUrls = vegetables.map(x => x[1]).concat([backgroundImage, dishImage]);
 let getTexture = key => PIXI.loader.resources['/static/images/' + key].texture;
 let getSprite = key => new PIXI.Sprite(getTexture(key));
+const R = 600;
+let vegetableStore = {
+  maxIndex: 0,
+};
 
 function setBackGround(app) {
   let background1 = getSprite(backgroundImage);
@@ -46,21 +50,53 @@ function setDish(app) {
   dish.width = app.height * 1.2;
   app.stage.addChild(dish);
 }
+
+function setDashBoard(app) {
+  for (let i = 0; i < vegetables.length; i++) {
+    let message = new PIXI.Text(vegetables[i][0] + " x " + 0);
+    message.x = R + 100;
+    message.y = 24 * i;
+    message.height = 24;
+    app.stage.addChild(message);
+    app.ticker.add(() => {
+      message.text = vegetables[i][0] + " x " + (vegetableStore[i] || 0);
+    });
+  }
+}
+
+function registVegetable(i, app) {
+  let index = i % vegetables.length;
+  vegetableStore[index] = vegetableStore[index] ? vegetableStore[index] + 1 : 1;
+  let vege = getSprite(vegetables[index][1]);
+  const size = 64;
+  const B = app.height + size / 2;
+  vege.x = R * Math.random() - size / 2;
+  vege.y = B * Math.random() - size / 2;
+  vege.i = i;
+  vege.t = 0;
+  vege.width = size;
+  vege.height = size;
+  app.stage.addChild(vege);
+  app.ticker.add(() => {
+    vege.t += 1;
+    if (vege.t % 10 === 0) {
+      vege.width = size + 5 * (Math.random() - 0.5);
+      vege.height = size + 5 * (Math.random() - 0.5);
+    }
+    if (vegetableStore.maxIndex > vege.i + 1000) app.stage.removeChild(vege);
+  });
+}
+
 startGame(resourceUrls, app => {
   setBackGround(app);
   setDish(app);
-  for (let i = 0; i < vegetables.length * 10; i++) {
-    let vege = getSprite(vegetables[i % vegetables.length][1]);
-    vege.width = 64;
-    vege.height = 64;
-    vege.x = 64 * (i % 10);
-    vege.y = 64 * Math.floor(i / 10);
-    app.stage.addChild(vege);
-    app.ticker.add(() => {
-      let g = Math.floor(vegetables.length * Math.random());
-      vege.texture = getTexture(vegetables[g][1]);
-      vege.x += 10 * (Math.random() - 0.5);
-      vege.y += 10 * (Math.random() - 0.5);
-    });
-  }
+  setDashBoard(app);
+  let t = 0;
+  app.ticker.add(() => {
+    t += 1;
+    if (t % 1 == 0) {
+      registVegetable(vegetableStore.maxIndex, app);
+      vegetableStore.maxIndex += 1;
+    }
+  })
 });
